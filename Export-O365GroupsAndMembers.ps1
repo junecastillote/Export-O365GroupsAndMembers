@@ -19,10 +19,15 @@ $daysToKeep = 60
 #----------------------------------------------------------------------------------------------------
 $Today=Get-Date
 [string]$filePrefix = '{0:dd-MMM-yyyy_hh-mm_tt}' -f $Today
-$logFile = "$($script_root)\Logs\DebugLog_$($filePrefix).txt"
-$BackupPath = "$($script_root)\BackupDir"
-$BackupFile="$($BackupPath)\Export_$($filePrefix).csv"
-$zipFile="$($BackupPath)\Export_$($filePrefix).zip"
+$logPath = "$($script_root)\Logs"
+$logFile = "$($logPath)\DebugLog_$($filePrefix).txt"
+$backupPath = "$($script_root)\BackupDir"
+$backupFile="$($backupPath)\Export_$($filePrefix).csv"
+$zipFile="$($backupPath)\Export_$($filePrefix).zip"
+
+#Create folders if not found
+if (!(Test-Path $logPath)) {New-Item -ItemType Directory -Path $logPath}
+if (!(Test-Path $backupPath)) {New-Item -ItemType Directory -Path $backupPath}
 #Functions------------------------------------------------------------------------------------------
 #Function to connect to EXO Shell
 Function New-EXOSession
@@ -153,31 +158,31 @@ foreach ($group in $grouplist)	{
 	$temp.SendModerationNotifications = $group.SendModerationNotifications
 	$temp.MailTip = $group.MailTip
 	if ($group_members.count -gt 0)	{ $temp.MembersUPN = $group_members.WindowsLiveID -join ";"	}
-	$temp | Export-Csv $BackupFile -NoTypeInformation -Append		
+	$temp | Export-Csv $backupFile -NoTypeInformation -Append		
 	$i=$i+1
 }
 #-----------------------------------------------------------------------------------------------
 #Zip the file to save space---------------------------------------------------------------------
 #for PS v5+
-#Compress-Archive -LiteralPath $BackupFile -CompressionLevel Optimal -DestinationPath $zipFile
+#Compress-Archive -LiteralPath $backupFile -CompressionLevel Optimal -DestinationPath $zipFile
 #for PS v4
-New-ZipFile -fileToZip $BackupFile -destinationZip $zipFile
+New-ZipFile -fileToZip $backupFile -destinationZip $zipFile
 Write-Host (get-date -Format "dd-MMM-yyyy hh:mm:ss tt") ": Backup Saved to $zipFile" -ForegroundColor Yellow
 $zipSize = (Get-ChildItem $zipFile | Measure-Object -Property Length -Sum)
 #Allow some time (in seconds) for the file access to close, increase especially if the resulting files are huge, or server I/O is busy.
 $sleepTime=5
 Write-Host (get-date -Format "dd-MMM-yyyy hh:mm:ss tt") ": Pending next operation for $($sleepTime) seconds" -ForegroundColor Yellow
 Start-Sleep -Seconds $sleepTime
-Remove-Item $BackupFile
+Remove-Item $backupFile
 #-----------------------------------------------------------------------------------------------
 #Invoke Housekeeping----------------------------------------------------------------------------
 if ($enableHousekeeping -eq $true){
 	Write-Host (get-date -Format "dd-MMM-yyyy hh:mm:ss tt") ": Deleting backup files older than $($daysToKeep) days" -ForegroundColor Yellow
-	Invoke-Housekeeping -folderPath $BackupPath -daysToKeep $daysToKeep
+	Invoke-Housekeeping -folderPath $backupPath -daysToKeep $daysToKeep
 }
 #-----------------------------------------------------------------------------------------------
 #Count the number of backups existing and the total size----------------------------------------
-$BackupCount = (Get-ChildItem $BackupPath -recurse | Measure-Object -Property Length -Sum)
+$BackupCount = (Get-ChildItem $backupPath -recurse | Measure-Object -Property Length -Sum)
 #-----------------------------------------------------------------------------------------------
 $timeTaken = New-TimeSpan -Start $Today -End (Get-Date)
 #Send email if option is enabled ---------------------------------------------------------------
