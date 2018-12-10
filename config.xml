@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<options
+	enableDebug="1"
+	sendReport="1"
+	tenantName="tenant org"
+	toAddress="recipient1@domain.com,recipient2@domain.com"
+	fromAddress="sender@domain.com"
+	enableHousekeeping="1"
+	daysToKeep="60"
+	notifyTeams="0"
+	teamsWebHook=""
+/>
