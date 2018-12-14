@@ -212,7 +212,7 @@ td, th {
 '@
 $htmlBody+="<tr><th>----SUMMARY----</th></tr>"
 $htmlBody+="<tr><th>Number of Groups</th><td>$($grouplist.count)</td></tr>"
-$htmlBody+="<tr><th>Backup ServerServer</th><td>"+(Get-Content env:computername)+"</td></tr>"
+$htmlBody+="<tr><th>Backup Server</th><td>"+(Get-Content env:computername)+"</td></tr>"
 $htmlBody+="<tr><th>Backup File</th><td>$($zipFile)</td></tr>"
 $htmlBody+="<tr><th>Backup Size</th><td>"+ ("{0:N2}" -f ($zipSize.Sum / 1KB)) + " KB</td></tr>"
 $htmlBody+="<tr><th>Time to Complete</th><td>"+ ("{0:N2}" -f $($timeTaken.TotalMinutes)) + " Minutes</td></tr>"
